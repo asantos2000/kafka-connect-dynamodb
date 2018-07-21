@@ -1,4 +1,4 @@
-# Using kafka connect to sink to aws dynamodb
+# Using kafka connect to sink to AWS dynamodb
 
 ## Building the connector
 Ref: <https://github.com/shikhar/kafka-connect-dynamodb>
@@ -66,7 +66,7 @@ Open the UI, and choose [Connectors](http://localhost:3030/kafka-connect-ui)
 
 Hit the [New](http://localhost:3030/kafka-connect-ui/#/cluster/fast-data-dev/select-connector) button and copy and paste the following configuration:
 
-Edit your aws credentials.
+Edit your AWS credentials.
 
 ```ini
 name=DynamoDbSinkConnector
@@ -124,11 +124,15 @@ kafka-avro-console-producer --broker-list localhost:9092 --topic alunos --proper
 kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic alunos --from-beginning
 ```
 
+On Kafka UI Tpoics
+
+![kafka topics ui](images/kafka-topics-ui.png)
+
 Go to Dynamodb table, tab Itens to see your records.
 
 > If something goes wrong, check the Connector UI, hit on DynamoDbSinkConnector and TASKS to see the log.
 
-![aws DynamoDB table](images/dynamo-table.png)
+![AWS DynamoDB table](images/dynamodb-table.png)
 
 ## Let's talk about topics
 
