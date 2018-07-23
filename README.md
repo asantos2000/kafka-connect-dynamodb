@@ -59,6 +59,8 @@ docker run \
  -e ADV_HOST=127.0.0.1 \
  -e RUNTESTS=0 \
  -v $PWD/kafka-connect-dynamodb/target/kafka-connect-dynamodb-0.3.0-SNAPSHOT-standalone.jar:/connectors/dynamodb.jar \
+ -v $PWD/myfiles:/myfiles \
+ -v $PWD/myfiles/data:/data \
  landoop/fast-data-dev
 ```
 After a minute or so, kafka is ready.
@@ -120,8 +122,8 @@ return HTTP status 201 (Created) and body below.
         "topics": "alunos",
         "tasks.max": "1",
         "region": "us-east-1",
-        "access.key.id": "AKIAJ52RQRPWQVCIPVBQ",
-        "secret.key": "bgWr3rm9KMtIEr0iBOKXycIOVonFdr0cp5yFuYaI",
+        "access.key.id": "[your key with permission to put on dynamodb]",
+        "secret.key": "[your secret key]",
         "ignore.record.key": "true"
     },
     "tasks": [],
