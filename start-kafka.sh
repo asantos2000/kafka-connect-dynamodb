@@ -7,14 +7,18 @@
 # 8083 : Kafka Connect Distributed      9584 : JMX
 # 2181 : ZooKeeper                      9585 : JMX
 # 3030 : Web Server
-#
-# Example (requires java): jconsole localhost:9581
 
 docker run \
  --rm \
- --name kafka
- --net=host \
+ --name kafka \
+ -p 2181:2181 \
+ -p 3030:3030 \
+ -p 8081-8083:8081-8083 \
+ -p 9581-9585:9581-9585 \
+ -p 9092:9092 \
  -e ADV_HOST=127.0.0.1 \
  -e RUNTESTS=0 \
- -v $PWD/connect/kafka-connect-dynamodb/target/kafka-connect-dynamodb-0.3.0-SNAPSHOT-standalone.jar:/connectors/dynamodb.jar \
+ -v $PWD/kafka-connect-dynamodb/target/kafka-connect-dynamodb-0.3.0-SNAPSHOT-standalone.jar:/connectors/dynamodb.jar \
+ -v $PWD/myfiles:/myfiles \
+ -v $PWD/myfiles/data:/data \
  landoop/fast-data-dev

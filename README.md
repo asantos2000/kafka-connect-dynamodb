@@ -1,9 +1,10 @@
-# Using kafka connect to sink to AWS dynamodb
+# Using Kafka connect to sink to AWS DynamoDB
 
 ## Building the connector
 Ref: <https://github.com/shikhar/kafka-connect-dynamodb>
 
 Run `build-dyno-connect.sh`
+> Requires Java8
 
 or
 
@@ -49,11 +50,15 @@ or run docker directly
 ```bash
 docker run \
  --rm \
- --name kafka
- --net:"host \
- -e ADV_HOST:"127.0.0.1 \
- -e RUNTESTS:"0 \
- -v $PWD/connect/kafka-connect-dynamodb/target/kafka-connect-dynamodb-0.3.0-SNAPSHOT-standalone.jar:/connectors/dynamodb.jar \
+ --name kafka \
+ -p 2181:2181 \
+ -p 3030:3030 \
+ -p 8081-8083:8081-8083 \
+ -p 9581-9585:9581-9585 \
+ -p 9092:9092 \
+ -e ADV_HOST=127.0.0.1 \
+ -e RUNTESTS=0 \
+ -v $PWD/kafka-connect-dynamodb/target/kafka-connect-dynamodb-0.3.0-SNAPSHOT-standalone.jar:/connectors/dynamodb.jar \
  landoop/fast-data-dev
 ```
 After a minute or so, kafka is ready.
@@ -80,7 +85,7 @@ ignore.record.key=true
 ```
 > `connect-dynamo-config.ini` file
 
-Hit [Create] if there is no red error messages.
+Hit [Create] if there are no red error messages.
 
 Or use curl (or postman) to send the configuration:
 
@@ -94,7 +99,7 @@ curl -X POST \
   "config": {
     "name": "DynamoDbSinkConnector",
     "connector.class": "dynamok.sink.DynamoDbSinkConnector",
-    "topics": "aluno",
+    "topics": "alunos",
     "tasks.max": 1,
     "region": "us-east-1",
     "access.key.id": "[your key with permission to put on dynamodb]",
@@ -104,31 +109,62 @@ curl -X POST \
 }'
 ```
 
-## Pruducing some messages
+return HTTP status 201 (Created) and body below.
 
-```bash
-docker exec -it kafka bash
+```json
+{
+    "name": "DynamoDbSinkConnector",
+    "config": {
+        "name": "DynamoDbSinkConnector",
+        "connector.class": "dynamok.sink.DynamoDbSinkConnector",
+        "topics": "alunos",
+        "tasks.max": "1",
+        "region": "us-east-1",
+        "access.key.id": "AKIAJ52RQRPWQVCIPVBQ",
+        "secret.key": "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",
+        "ignore.record.key": "true"
+    },
+    "tasks": [],
+    "type": null
+}
 ```
-Inside the container run:
+
+## Producing some messages
+
+Run `shell.sh` or `docker exec -it kafka bash` to get in the container and run:
 
 ```bash
 # Producer
-kafka-avro-console-producer --broker-list localhost:9092 --topic alunos --property value.schema:"'{"type":"record","name":"aluno","fields":[{"name":"id","type":"string"},{"name":"nome", "type": "string"}]}'"
+kafka-avro-console-producer --broker-list localhost:9092 --topic alunos --property value.schema='{"type":"record","name":"aluno","fields":[{"name":"id","type":"string"},{"name":"nome", "type": "string"}]}'
 
 # Copy and paste
 {"id":"1","nome":"Anderson"}
 {"id":"2","nome":"Stela"}
 {"id":"3","nome":"Gabriel"}
+{"id":"4","nome":"Margot"}
+{"id":"5","nome":"Oliver"}
+{"id":"6","nome":"Lune"}
+{"id":"7","nome":"Kate"}
+{"id":"8","nome":"Any"}
+{"id":"9","nome":"Dimitri"}
 
 # Consumer
 kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic alunos --from-beginning
 ```
 
-On Kafka UI Tpoics
+To send a batch of messages, put those messages in a file and run:
+
+```bash
+cd /myfiles
+
+cat messages.txt | kafka-avro-console-producer --broker-list localhost:9092 --topic alunos --property value.schema='{"type":"record","name":"aluno","fields":[{"name":"id","type":"string"},{"name":"nome", "type": "string"}]}'
+```
+
+On Kafka UI Topics
 
 ![kafka topics ui](images/kafka-topics-ui.png)
 
-Go to Dynamodb table, tab Itens to see your records.
+Go to Dynamodb table, tab Items to see your records.
 
 > If something goes wrong, check the Connector UI, hit on DynamoDbSinkConnector and TASKS to see the log.
 
@@ -136,7 +172,7 @@ Go to Dynamodb table, tab Itens to see your records.
 
 ## Let's talk about topics
 
-After configure the connector, it'll create the topic listed on topics key at config. If you need to customize this topic (for instance, to match number of tasks) use the kafka-topic command before or after configure the connector.
+After configuring the connector, it'll create the topic listed on topics key at the config. If you need to customize this topic (for instance, to match the number of tasks) use the kafka-topic command before or after configure the connector.
 
 ```bash
 # Create topic
